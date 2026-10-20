@@ -79,6 +79,7 @@
     .utility-result span { display: block; color: #d8e2da; font-size: 11px; }
     .utility-result strong { display: block; margin-top: 7px; font-size: 20px; letter-spacing: -.04em; }
     .utility-message { min-height: 18px; margin: 13px 0 0; color: var(--muted); font-size: 11px; }
+    .meter-difference { min-height: 18px; margin: 12px 0 0; color: var(--green); font-size: 11px; font-weight: 650; line-height: 1.5; }
     .ownership-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 14px; }
     .property-kind { margin: 0 0 18px; }
     .property-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 18px; }
@@ -262,12 +263,12 @@
         <div>
           <p class="section-kicker">Közüzemi díjelőleg</p>
           <h2 id="heating-title">Fűtési elszámolás</h2>
-          <p class="ownership-intro">Add meg az előző évi elszámolásban szereplő teljes egyéni fűtési díjat forintban. A kalkulátor ennek egytizenkettedét adja hozzá a havi díjakhoz.</p>
+          <p class="ownership-intro">Add meg az előző évi elszámolásban szereplő teljes egyéni fűtési díjat forintban. Ha megadod, az aktuális közmű-elszámolás végösszegéből levonjuk.</p>
         </div>
         <div class="field">
           <label for="heating-annual">Előző évi összes fűtési díj</label>
           <div class="input-wrap"><input id="heating-annual" type="number" min="0" step="1" inputmode="numeric" placeholder="pl. 120000"><span class="unit">Ft / év</span></div>
-          <p class="ownership-intro" id="heating-monthly-preview">Ha üresen hagyod, nem számolunk fűtési díjelőleget.</p>
+          <p class="ownership-intro" id="heating-monthly-preview">Ha üresen hagyod, nincs levonandó előző évi fűtési díj.</p>
         </div>
       </section>
 
@@ -282,6 +283,7 @@
               <div class="field"><label for="heat-open">Nyitó állás (MWh)</label><div class="input-wrap"><input id="heat-open" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">MWh</span></div></div>
               <div class="field"><label for="heat-close">Záró állás (MWh)</label><div class="input-wrap"><input id="heat-close" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">MWh</span></div></div>
             </div>
+            <p class="meter-difference" id="heat-difference">Fogyasztás: —</p>
           </div>
           <div class="utility-meter">
             <h3>Melegvízóra</h3>
@@ -289,14 +291,18 @@
               <div class="field"><label for="water-open">Nyitó állás (m³)</label><div class="input-wrap"><input id="water-open" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">m³</span></div></div>
               <div class="field"><label for="water-close">Záró állás (m³)</label><div class="input-wrap"><input id="water-close" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">m³</span></div></div>
             </div>
+            <p class="meter-difference" id="water-difference">Fogyasztás: —</p>
           </div>
         </div>
         <div class="utility-results" aria-live="polite">
           <div class="utility-result"><span>Hőfogyasztás díja · 11 111 Ft/MWh</span><strong id="heat-cost">—</strong></div>
           <div class="utility-result"><span>Melegvíz díja · 556 Ft/m³</span><strong id="water-cost">—</strong></div>
           <div class="utility-result"><span>Gáz alapdíj becslése</span><strong id="gas-base-cost">—</strong></div>
+          <div class="utility-result"><span>Összes közműdíj</span><strong id="utility-total">—</strong></div>
+          <div class="utility-result"><span>Elszámolási különbözet</span><strong id="utility-balance">—</strong></div>
+          <div class="utility-result"><span>Új közüzemi díjelőleg · összes díj / 12</span><strong id="utility-advance">—</strong></div>
         </div>
-        <p class="utility-message" id="utility-message">A gáz alapdíj becslése: 49,49 m² alapterülethez 13 915 Ft.</p>
+        <p class="utility-message" id="utility-message">Az elszámolási különbözetből levonjuk az előző évi fűtési díjat, ha megadtad. Az új havi díjelőleg viszont a levonás előtti teljes közműdíj 1/12-e.</p>
       </section>
 
       <section class="fee-section" aria-labelledby="fee-title">
@@ -315,7 +321,7 @@
           <div class="fee-total-card"><span>Felújítási alap terasz</span><strong id="renovation-terrace-total">—</strong></div>
           <div class="fee-total-card"><span>Felújítási alap lakás</span><strong id="renovation-dwelling-total">—</strong></div>
           <div class="fee-total-card"><span>Egyéb díjak</span><strong id="other-fees-total">—</strong></div>
-          <div class="fee-total-card" id="heating-total-card"><span>Közüzemi díjelőleg (fűtés)</span><strong id="heating-total">—</strong></div>
+          <div class="fee-total-card" id="heating-total-card"><span>Új közüzemi díjelőleg</span><strong id="heating-total">—</strong></div>
         </div>
         <div class="period-controls" aria-label="Havi bontás időszaka">
           <div class="field"><label for="period-start">Kezdő hónap</label><input id="period-start" type="month" min="2025-01"></div>
@@ -325,7 +331,7 @@
         <h3 class="monthly-heading">Havi bontás</h3>
         <div class="monthly-table-wrap">
           <table class="monthly-table">
-            <thead><tr><th>Hónap</th><th>Közös költség terasz</th><th>Közös költség lakás</th><th>Felújítási alap terasz</th><th>Felújítási alap lakás</th><th>Egyéb díjak</th><th>Közüzemi díjelőleg (fűtés)</th><th>Havi összesen</th></tr></thead>
+            <thead><tr><th>Hónap</th><th>Közös költség terasz</th><th>Közös költség lakás</th><th>Felújítási alap terasz</th><th>Felújítási alap lakás</th><th>Egyéb díjak</th><th>Új közüzemi díjelőleg</th><th>Havi összesen</th></tr></thead>
             <tbody id="monthly-rows"></tbody>
           </table>
         </div>
@@ -391,8 +397,6 @@
       const monthlyRows = document.getElementById('monthly-rows');
       const heatingAnnual = document.getElementById('heating-annual');
       const heatingPreview = document.getElementById('heating-monthly-preview');
-      const heatingHeading = document.getElementById('monthly-heating-heading');
-      const heatingTotalCard = document.getElementById('heating-total-card');
       const meterInputs = {
         heatOpen: document.getElementById('heat-open'),
         heatClose: document.getElementById('heat-close'),
@@ -421,8 +425,9 @@
         }
       };
       const formatFt = (value) => `${Math.round(value).toLocaleString('hu-HU')} Ft`;
+      const formatSignedFt = (value) => value < 0 ? `−${formatFt(Math.abs(value))}` : formatFt(value);
       const formatUsage = (value, unit) => `${value.toLocaleString('hu-HU', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} ${unit}`;
-      const updateUtilitySettlement = () => {
+      const calculateUtility = () => {
         const calculate = (openInput, closeInput, rate) => {
           if (openInput.value === '' || closeInput.value === '') return { amount: null, cost: null, invalid: false };
           const open = Number(openInput.value);
@@ -433,15 +438,33 @@
         };
         const heat = calculate(meterInputs.heatOpen, meterInputs.heatClose, 11111);
         const water = calculate(meterInputs.waterOpen, meterInputs.waterClose, 556);
-        document.getElementById('heat-cost').textContent = heat.cost === null ? '—' : formatFt(heat.cost);
-        document.getElementById('water-cost').textContent = water.cost === null ? '—' : formatFt(water.cost);
         const area = Number(units[0]?.area) || 0;
         const gasBase = area * (13915 / 49.49);
+        const valid = !heat.invalid && !water.invalid && heat.cost !== null && water.cost !== null && area > 0;
+        const total = valid ? heat.cost + water.cost + gasBase : null;
+        const hasCredit = heatingAnnual.value !== '' && Number.isFinite(Number(heatingAnnual.value)) && Number(heatingAnnual.value) >= 0;
+        const balance = total === null ? null : total - (hasCredit ? Number(heatingAnnual.value) : 0);
+        const advance = total === null ? null : Math.round(total / 12);
+        return { heat, water, area, gasBase, valid, total, hasCredit, balance, advance };
+      };
+      const updateUtilitySettlement = () => {
+        const utility = calculateUtility();
+        const { heat, water, area, gasBase, valid, total, hasCredit, balance, advance } = utility;
+        document.getElementById('heat-cost').textContent = heat.cost === null ? '—' : formatFt(heat.cost);
+        document.getElementById('water-cost').textContent = water.cost === null ? '—' : formatFt(water.cost);
         document.getElementById('gas-base-cost').textContent = area > 0 ? formatFt(gasBase) : 'Add meg az alapterületet';
+        const heatDifference = document.getElementById('heat-difference');
+        const waterDifference = document.getElementById('water-difference');
+        heatDifference.textContent = heat.invalid ? 'Hibás állás: a záró érték nem lehet kisebb a nyitónál.' : heat.amount === null ? 'Fogyasztás: add meg mindkét mérőállást.' : `Fogyasztási különbség: ${formatUsage(heat.amount, 'MWh')} · ${formatFt(heat.cost)}.`;
+        waterDifference.textContent = water.invalid ? 'Hibás állás: a záró érték nem lehet kisebb a nyitónál.' : water.amount === null ? 'Fogyasztási különbség: add meg mindkét mérőállást.' : `Fogyasztási különbség: ${formatUsage(water.amount, 'm³')} · ${formatFt(water.cost)}.`;
+        document.getElementById('utility-total').textContent = total === null ? '—' : formatFt(total);
+        document.getElementById('utility-balance').textContent = balance === null ? '—' : formatSignedFt(balance);
+        document.getElementById('utility-advance').textContent = advance === null ? '—' : formatFt(advance);
         const message = document.getElementById('utility-message');
-        const invalid = heat.invalid || water.invalid;
-        if (invalid) message.textContent = 'A záró állás nem lehet kisebb a nyitó állásnál.';
-        else message.textContent = `Fogyasztás: hő ${heat.amount === null ? '—' : formatUsage(heat.amount, 'MWh')}; melegvíz ${water.amount === null ? '—' : formatUsage(water.amount, 'm³')}. Gáz alapdíj becslése: 49,49 m²-re 13 915 Ft.`;
+        if (balance !== null) message.textContent = hasCredit ? `Az elszámolási különbözetből ${formatFt(Number(heatingAnnual.value))} előző évi fűtési díjat vontunk le. Az előleg számítása a levonás előtti ${formatFt(total)} összegből történt.` : 'Nem adtál meg előző évi fűtési díjat, ezért nincs levonás. Az új havi előleg a teljes közműdíj 1/12-e.';
+        else if (heat.invalid || water.invalid) message.textContent = 'Ellenőrizd a mérőállásokat: a záró érték nem lehet kisebb a nyitónál.';
+        else message.textContent = 'A teljes elszámoláshoz add meg mindkét mérőóra nyitó és záró állását, valamint a lakás alapterületét.';
+        return utility;
       };
       const monthIndex = (month) => {
         const [year, number] = month.split('-').map(Number);
@@ -463,9 +486,9 @@
         const rows = [];
         for (let index = monthIndex(start); index <= monthIndex(end); index += 1) {
           const date = new Date(Math.floor(index / 12), index % 12, 1);
-          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(fees.commonTerrace)}</td><td>${formatFt(fees.commonDwelling)}</td><td>${formatFt(fees.renovationTerrace)}</td><td>${formatFt(fees.renovationDwelling)}</td><td>${formatFt(fees.otherFees)}</td><td>${fees.hasHeating ? formatFt(fees.heatingMonthly) : '—'}</td><td>${formatFt(fees.total)}</td></tr>`);
+          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(fees.commonTerrace)}</td><td>${formatFt(fees.commonDwelling)}</td><td>${formatFt(fees.renovationTerrace)}</td><td>${formatFt(fees.renovationDwelling)}</td><td>${formatFt(fees.otherFees)}</td><td>${fees.hasUtilityAdvance ? formatFt(fees.utilityAdvance) : '—'}</td><td>${formatFt(fees.total)}</td></tr>`);
         }
-        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(fees.commonTerrace * count)}</td><td>${formatFt(fees.commonDwelling * count)}</td><td>${formatFt(fees.renovationTerrace * count)}</td><td>${formatFt(fees.renovationDwelling * count)}</td><td>${formatFt(fees.otherFees * count)}</td><td>${fees.hasHeating ? formatFt(fees.heatingMonthly * count) : '—'}</td><td>${formatFt(fees.total * count)}</td></tr>`);
+        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(fees.commonTerrace * count)}</td><td>${formatFt(fees.commonDwelling * count)}</td><td>${formatFt(fees.renovationTerrace * count)}</td><td>${formatFt(fees.renovationDwelling * count)}</td><td>${formatFt(fees.otherFees * count)}</td><td>${fees.hasUtilityAdvance ? formatFt(fees.utilityAdvance * count) : '—'}</td><td>${formatFt(fees.total * count)}</td></tr>`);
         monthlyRows.innerHTML = rows.join('');
       };
       const updateFees = () => {
@@ -492,9 +515,10 @@
         const common = commonDwelling + commonTerrace + commonExtras;
         const renovation = renovationDwelling + renovationTerrace + renovationExtras;
         const otherFees = commonExtras + renovationExtras;
-        const hasHeating = heatingAnnual.value !== '' && Number.isFinite(Number(heatingAnnual.value)) && Number(heatingAnnual.value) >= 0;
-        const heatingMonthly = hasHeating ? Math.round(Number(heatingAnnual.value) / 12) : 0;
-        const total = commonTerrace + commonDwelling + renovationTerrace + renovationDwelling + otherFees + heatingMonthly;
+        const utility = calculateUtility();
+        const hasUtilityAdvance = utility.advance !== null;
+        const utilityAdvance = utility.advance || 0;
+        const total = commonTerrace + commonDwelling + renovationTerrace + renovationDwelling + otherFees + utilityAdvance;
         const rows = [];
         const add = (name, rate, quantity, unitLabel) => rows.push({ name, rate, quantity, unitLabel, amount: rate * quantity });
         add(`Közös költség alap (${isOffice ? 'iroda/üzlet' : 'lakás'})`, 330, mainArea, 'm²');
@@ -509,16 +533,16 @@
         add('Teremgarázs felújítási alap', 250, garage.length, 'db');
         add('Felszíni beálló közös költség', 2200, outdoor.length, 'db');
         add('Felszíni beálló felújítási alap', 150, outdoor.length, 'db');
-        if (hasHeating) rows.push({ name: 'Közüzemi díjelőleg (fűtés)', rate: Number(heatingAnnual.value) / 12, quantity: 1, unitLabel: 'hó', amount: heatingMonthly });
-        feeRows.innerHTML = `${rows.map((row) => `<tr><td>${row.name}</td><td>${row.name === 'Közüzemi díjelőleg (fűtés)' ? `${formatFt(Number(heatingAnnual.value))} / év ÷ 12` : `${formatFt(row.rate)} / ${row.unitLabel}`}</td><td>${row.name === 'Közüzemi díjelőleg (fűtés)' ? '1 hó' : `${Number(row.quantity.toFixed(2)).toLocaleString('hu-HU')} ${row.unitLabel}`}</td><td>${formatFt(row.amount)}</td></tr>`).join('')}<tr class="fee-total"><td colspan="3">Havi összesen</td><td>${formatFt(total)}</td></tr>`;
+        if (hasUtilityAdvance) rows.push({ name: 'Új közüzemi díjelőleg', rate: utilityAdvance, quantity: 1, unitLabel: 'hó', amount: utilityAdvance });
+        feeRows.innerHTML = `${rows.map((row) => `<tr><td>${row.name}</td><td>${row.name === 'Új közüzemi díjelőleg' ? `${formatFt(utility.total)} / 12` : `${formatFt(row.rate)} / ${row.unitLabel}`}</td><td>${row.name === 'Új közüzemi díjelőleg' ? '1 hó' : `${Number(row.quantity.toFixed(2)).toLocaleString('hu-HU')} ${row.unitLabel}`}</td><td>${formatFt(row.amount)}</td></tr>`).join('')}<tr class="fee-total"><td colspan="3">Havi összesen</td><td>${formatFt(total)}</td></tr>`;
         document.getElementById('common-terrace-total').textContent = formatFt(commonTerrace);
         document.getElementById('common-dwelling-total').textContent = formatFt(commonDwelling);
         document.getElementById('renovation-terrace-total').textContent = formatFt(renovationTerrace);
         document.getElementById('renovation-dwelling-total').textContent = formatFt(renovationDwelling);
         document.getElementById('other-fees-total').textContent = formatFt(otherFees);
-        document.getElementById('heating-total').textContent = hasHeating ? formatFt(heatingMonthly) : '—';
-        heatingPreview.textContent = hasHeating ? `Havi közüzemi díjelőleg: ${formatFt(heatingMonthly)} (az éves összeg 1/12-e).` : 'Ha üresen hagyod, nem számolunk fűtési díjelőleget.';
-        renderMonthly({ commonTerrace, commonDwelling, renovationTerrace, renovationDwelling, otherFees, heatingMonthly, hasHeating, total });
+        document.getElementById('heating-total').textContent = hasUtilityAdvance ? formatFt(utilityAdvance) : '—';
+        heatingPreview.textContent = heatingAnnual.value !== '' && Number(heatingAnnual.value) >= 0 ? `Elszámoláskor levonandó összeg: ${formatFt(Number(heatingAnnual.value))}.` : 'Ha üresen hagyod, nincs levonandó előző évi fűtési díj.';
+        renderMonthly({ commonTerrace, commonDwelling, renovationTerrace, renovationDwelling, otherFees, utilityAdvance, hasUtilityAdvance, total });
       };
       const makeUnit = (data = {}) => ({ type: data.type || 'Lakás', area: data.area || '', numerator: data.numerator || '' });
       const createCalculator = (unit, prefix, isExtra = false) => {
@@ -569,8 +593,8 @@
         save(); updateFees();
       });
       terraceArea.addEventListener('input', () => { save(); updateFees(); });
-      heatingAnnual.addEventListener('input', () => { save(false); updateFees(); });
-      meterKeys.forEach((key) => meterInputs[key].addEventListener('input', () => { save(false); updateUtilitySettlement(); }));
+      heatingAnnual.addEventListener('input', () => { save(false); updateUtilitySettlement(); updateFees(); });
+      meterKeys.forEach((key) => meterInputs[key].addEventListener('input', () => { save(false); updateUtilitySettlement(); updateFees(); }));
       periodStart.addEventListener('change', updateFees);
       periodEnd.addEventListener('change', updateFees);
       const lastTwelveStartIndex = Math.max(monthIndex(minMonth), monthIndex(currentMonth) - 11);
