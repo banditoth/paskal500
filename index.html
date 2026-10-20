@@ -70,6 +70,15 @@
     .heating-panel .section-kicker { color: var(--lime); }
     .heating-panel .ownership-intro { color: #d8e2da; }
     .heating-panel .field label { color: #e3ece3; }
+    .utility-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
+    .utility-meter { padding: 20px; border: 1px solid var(--line); border-radius: 15px; background: #f9f9f5; }
+    .utility-meter h3 { margin: 0 0 15px; font-size: 15px; letter-spacing: -.03em; }
+    .meter-readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .utility-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .utility-result { padding: 16px; border-radius: 13px; background: var(--green); color: white; }
+    .utility-result span { display: block; color: #d8e2da; font-size: 11px; }
+    .utility-result strong { display: block; margin-top: 7px; font-size: 20px; letter-spacing: -.04em; }
+    .utility-message { min-height: 18px; margin: 13px 0 0; color: var(--muted); font-size: 11px; }
     .ownership-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 14px; }
     .property-kind { margin: 0 0 18px; }
     .property-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 18px; }
@@ -163,6 +172,8 @@
       .fee-section { margin-top: 30px; padding: 25px 18px; }
       .fee-section h2 { font-size: 24px; }
       .fee-breakdown { grid-template-columns: 1fr; }
+      .utility-meters { grid-template-columns: 1fr; }
+      .utility-results { grid-template-columns: 1fr; }
       .period-controls { align-items: stretch; flex-direction: column; }
       .period-controls .field { width: 100%; }
       .ownership h2 { font-size: 26px; }
@@ -260,6 +271,34 @@
         </div>
       </section>
 
+      <section class="fee-section" aria-labelledby="utility-title">
+        <p class="section-kicker">Mérőóra-leolvasás</p>
+        <h2 id="utility-title">Közműdíj elszámolás</h2>
+        <p class="section-note">Add meg a nyitó és záró mérőállást. Az elszámolás a két állás különbségéből számol; az alapdíj becslése a lakás alapterületén alapul.</p>
+        <div class="utility-meters">
+          <div class="utility-meter">
+            <h3>Hőmennyiségmérő</h3>
+            <div class="meter-readings">
+              <div class="field"><label for="heat-open">Nyitó állás (MWh)</label><div class="input-wrap"><input id="heat-open" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">MWh</span></div></div>
+              <div class="field"><label for="heat-close">Záró állás (MWh)</label><div class="input-wrap"><input id="heat-close" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">MWh</span></div></div>
+            </div>
+          </div>
+          <div class="utility-meter">
+            <h3>Melegvízóra</h3>
+            <div class="meter-readings">
+              <div class="field"><label for="water-open">Nyitó állás (m³)</label><div class="input-wrap"><input id="water-open" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">m³</span></div></div>
+              <div class="field"><label for="water-close">Záró állás (m³)</label><div class="input-wrap"><input id="water-close" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0,000"><span class="unit">m³</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="utility-results" aria-live="polite">
+          <div class="utility-result"><span>Hőfogyasztás díja · 11 111 Ft/MWh</span><strong id="heat-cost">—</strong></div>
+          <div class="utility-result"><span>Melegvíz díja · 556 Ft/m³</span><strong id="water-cost">—</strong></div>
+          <div class="utility-result"><span>Gáz alapdíj becslése</span><strong id="gas-base-cost">—</strong></div>
+        </div>
+        <p class="utility-message" id="utility-message">A gáz alapdíj becslése: 49,49 m² alapterülethez 13 915 Ft.</p>
+      </section>
+
       <section class="fee-section" aria-labelledby="fee-title">
         <p class="section-kicker">Becsült havi díjak</p>
         <h2 id="fee-title">Közös költség és felújítási alap</h2>
@@ -354,6 +393,13 @@
       const heatingPreview = document.getElementById('heating-monthly-preview');
       const heatingHeading = document.getElementById('monthly-heating-heading');
       const heatingTotalCard = document.getElementById('heating-total-card');
+      const meterInputs = {
+        heatOpen: document.getElementById('heat-open'),
+        heatClose: document.getElementById('heat-close'),
+        waterOpen: document.getElementById('water-open'),
+        waterClose: document.getElementById('water-close'),
+      };
+      const meterKeys = Object.keys(meterInputs);
       const storageKey = 'paskal500.ownership.v2';
       const referenceArea = 49;
       const referenceNumerator = 237;
@@ -366,7 +412,8 @@
       let units = [];
       const save = (announce = true) => {
         try {
-          const data = { kind: propertyKind.value, hasElevator: hasElevator.checked, hasTerrace: hasTerrace.checked, terraceArea: terraceArea.value, heatingAnnual: heatingAnnual.value, units };
+          const meters = Object.fromEntries(meterKeys.map((key) => [key, meterInputs[key].value]));
+          const data = { kind: propertyKind.value, hasElevator: hasElevator.checked, hasTerrace: hasTerrace.checked, terraceArea: terraceArea.value, heatingAnnual: heatingAnnual.value, meters, units };
           localStorage.setItem(storageKey, JSON.stringify(data));
           if (announce) status.textContent = 'Az adatok elmentve ezen a böngészőn.';
         } catch (_) {
@@ -374,6 +421,28 @@
         }
       };
       const formatFt = (value) => `${Math.round(value).toLocaleString('hu-HU')} Ft`;
+      const formatUsage = (value, unit) => `${value.toLocaleString('hu-HU', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} ${unit}`;
+      const updateUtilitySettlement = () => {
+        const calculate = (openInput, closeInput, rate) => {
+          if (openInput.value === '' || closeInput.value === '') return { amount: null, cost: null, invalid: false };
+          const open = Number(openInput.value);
+          const close = Number(closeInput.value);
+          if (!Number.isFinite(open) || !Number.isFinite(close) || open < 0 || close < open) return { amount: null, cost: null, invalid: true };
+          const amount = close - open;
+          return { amount, cost: amount * rate, invalid: false };
+        };
+        const heat = calculate(meterInputs.heatOpen, meterInputs.heatClose, 11111);
+        const water = calculate(meterInputs.waterOpen, meterInputs.waterClose, 556);
+        document.getElementById('heat-cost').textContent = heat.cost === null ? '—' : formatFt(heat.cost);
+        document.getElementById('water-cost').textContent = water.cost === null ? '—' : formatFt(water.cost);
+        const area = Number(units[0]?.area) || 0;
+        const gasBase = area * (13915 / 49.49);
+        document.getElementById('gas-base-cost').textContent = area > 0 ? formatFt(gasBase) : 'Add meg az alapterületet';
+        const message = document.getElementById('utility-message');
+        const invalid = heat.invalid || water.invalid;
+        if (invalid) message.textContent = 'A záró állás nem lehet kisebb a nyitó állásnál.';
+        else message.textContent = `Fogyasztás: hő ${heat.amount === null ? '—' : formatUsage(heat.amount, 'MWh')}; melegvíz ${water.amount === null ? '—' : formatUsage(water.amount, 'm³')}. Gáz alapdíj becslése: 49,49 m²-re 13 915 Ft.`;
+      };
       const monthIndex = (month) => {
         const [year, number] = month.split('-').map(Number);
         return year * 12 + number - 1;
@@ -465,21 +534,21 @@
         areaInput.addEventListener('input', () => {
           const value = Number(areaInput.value);
           if (areaInput.value && Number.isFinite(value) && value > 0) numeratorInput.value = String(Math.round(value / referenceArea * referenceNumerator));
-          syncData(); save(); updateFees();
+          syncData(); save(); updateFees(); updateUtilitySettlement();
         });
         numeratorInput.addEventListener('input', () => {
           const value = Number(numeratorInput.value);
           if (numeratorInput.value && Number.isFinite(value) && value >= 0) areaInput.value = String(Math.round(value / referenceDenominator * (referenceArea * referenceDenominator / referenceNumerator) * 100) / 100);
-          syncData(); save(); updateFees();
+          syncData(); save(); updateFees(); updateUtilitySettlement();
         });
         if (isExtra) {
           const typeSelect = card.querySelector('select');
           typeSelect.value = unit.type;
-          typeSelect.addEventListener('change', () => { unit.type = typeSelect.value; save(); updateFees(); });
+          typeSelect.addEventListener('change', () => { unit.type = typeSelect.value; save(); updateFees(); updateUtilitySettlement(); });
           card.querySelector('.remove-extra').addEventListener('click', () => {
             const index = units.indexOf(unit);
             if (index >= 0) units.splice(index, 1);
-            renderExtras(); save(); updateFees();
+            renderExtras(); save(); updateFees(); updateUtilitySettlement();
           });
         }
         return card;
@@ -501,6 +570,7 @@
       });
       terraceArea.addEventListener('input', () => { save(); updateFees(); });
       heatingAnnual.addEventListener('input', () => { save(false); updateFees(); });
+      meterKeys.forEach((key) => meterInputs[key].addEventListener('input', () => { save(false); updateUtilitySettlement(); }));
       periodStart.addEventListener('change', updateFees);
       periodEnd.addEventListener('change', updateFees);
       const lastTwelveStartIndex = Math.max(monthIndex(minMonth), monthIndex(currentMonth) - 11);
@@ -517,6 +587,7 @@
           hasTerrace.checked = Boolean(saved.hasTerrace);
           terraceArea.value = saved.terraceArea || '';
           heatingAnnual.value = saved.heatingAnnual || '';
+          if (saved.meters) meterKeys.forEach((key) => { meterInputs[key].value = saved.meters[key] || ''; });
         }
       } catch (_) {
         status.textContent = 'Az elmentett adatok nem olvashatók ebben a böngészőben.';
@@ -524,7 +595,7 @@
       if (!units.length) units = [makeUnit({ type: propertyKind.value })];
       propertyKind.value = units[0].type === 'iroda/üzlet' ? 'iroda/üzlet' : 'lakás';
       terraceAreaField.hidden = !hasTerrace.checked;
-      renderPrimary(); renderExtras(); updateFees();
+      renderPrimary(); renderExtras(); updateFees(); updateUtilitySettlement();
     })();
   </script>
 </body>
