@@ -66,6 +66,10 @@
     .ownership { display: grid; grid-template-columns: .82fr 1.18fr; gap: 40px; align-items: center; margin: 72px 0 0; padding: 35px 40px; border: 1px solid var(--line); border-radius: 22px; background: var(--white); box-shadow: 0 10px 30px rgb(35 49 42 / 4%); }
     .ownership h2 { font-size: 30px; }
     .ownership-intro { margin: 13px 0 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .heating-panel { border-color: var(--green); background: var(--green); color: white; }
+    .heating-panel .section-kicker { color: var(--lime); }
+    .heating-panel .ownership-intro { color: #d8e2da; }
+    .heating-panel .field label { color: #e3ece3; }
     .ownership-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 14px; }
     .property-kind { margin: 0 0 18px; }
     .property-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 18px; }
@@ -243,7 +247,7 @@
         </div>
       </section>
 
-      <section class="ownership" aria-labelledby="heating-title">
+      <section class="ownership heating-panel" aria-labelledby="heating-title">
         <div>
           <p class="section-kicker">Közüzemi díjelőleg</p>
           <h2 id="heating-title">Fűtési elszámolás</h2>
@@ -272,7 +276,7 @@
           <div class="fee-total-card"><span>Felújítási alap terasz</span><strong id="renovation-terrace-total">—</strong></div>
           <div class="fee-total-card"><span>Felújítási alap lakás</span><strong id="renovation-dwelling-total">—</strong></div>
           <div class="fee-total-card"><span>Egyéb díjak</span><strong id="other-fees-total">—</strong></div>
-          <div class="fee-total-card" id="heating-total-card" hidden><span>Közüzemi díjelőleg (fűtés)</span><strong id="heating-total">—</strong></div>
+          <div class="fee-total-card" id="heating-total-card"><span>Közüzemi díjelőleg (fűtés)</span><strong id="heating-total">—</strong></div>
         </div>
         <div class="period-controls" aria-label="Havi bontás időszaka">
           <div class="field"><label for="period-start">Kezdő hónap</label><input id="period-start" type="month" min="2025-01"></div>
@@ -282,7 +286,7 @@
         <h3 class="monthly-heading">Havi bontás</h3>
         <div class="monthly-table-wrap">
           <table class="monthly-table">
-            <thead><tr><th>Hónap</th><th>Közös költség terasz</th><th>Közös költség lakás</th><th>Felújítási alap terasz</th><th>Felújítási alap lakás</th><th>Egyéb díjak</th><th id="monthly-heating-heading" hidden>Közüzemi díjelőleg (fűtés)</th><th>Havi összesen</th></tr></thead>
+            <thead><tr><th>Hónap</th><th>Közös költség terasz</th><th>Közös költség lakás</th><th>Felújítási alap terasz</th><th>Felújítási alap lakás</th><th>Egyéb díjak</th><th>Közüzemi díjelőleg (fűtés)</th><th>Havi összesen</th></tr></thead>
             <tbody id="monthly-rows"></tbody>
           </table>
         </div>
@@ -390,9 +394,9 @@
         const rows = [];
         for (let index = monthIndex(start); index <= monthIndex(end); index += 1) {
           const date = new Date(Math.floor(index / 12), index % 12, 1);
-          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(fees.commonTerrace)}</td><td>${formatFt(fees.commonDwelling)}</td><td>${formatFt(fees.renovationTerrace)}</td><td>${formatFt(fees.renovationDwelling)}</td><td>${formatFt(fees.otherFees)}</td>${fees.hasHeating ? `<td>${formatFt(fees.heatingMonthly)}</td>` : ''}<td>${formatFt(fees.total)}</td></tr>`);
+          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(fees.commonTerrace)}</td><td>${formatFt(fees.commonDwelling)}</td><td>${formatFt(fees.renovationTerrace)}</td><td>${formatFt(fees.renovationDwelling)}</td><td>${formatFt(fees.otherFees)}</td><td>${fees.hasHeating ? formatFt(fees.heatingMonthly) : '—'}</td><td>${formatFt(fees.total)}</td></tr>`);
         }
-        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(fees.commonTerrace * count)}</td><td>${formatFt(fees.commonDwelling * count)}</td><td>${formatFt(fees.renovationTerrace * count)}</td><td>${formatFt(fees.renovationDwelling * count)}</td><td>${formatFt(fees.otherFees * count)}</td>${fees.hasHeating ? `<td>${formatFt(fees.heatingMonthly * count)}</td>` : ''}<td>${formatFt(fees.total * count)}</td></tr>`);
+        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(fees.commonTerrace * count)}</td><td>${formatFt(fees.commonDwelling * count)}</td><td>${formatFt(fees.renovationTerrace * count)}</td><td>${formatFt(fees.renovationDwelling * count)}</td><td>${formatFt(fees.otherFees * count)}</td><td>${fees.hasHeating ? formatFt(fees.heatingMonthly * count) : '—'}</td><td>${formatFt(fees.total * count)}</td></tr>`);
         monthlyRows.innerHTML = rows.join('');
       };
       const updateFees = () => {
@@ -443,9 +447,7 @@
         document.getElementById('renovation-terrace-total').textContent = formatFt(renovationTerrace);
         document.getElementById('renovation-dwelling-total').textContent = formatFt(renovationDwelling);
         document.getElementById('other-fees-total').textContent = formatFt(otherFees);
-        heatingHeading.hidden = !hasHeating;
-        heatingTotalCard.hidden = !hasHeating;
-        document.getElementById('heating-total').textContent = formatFt(heatingMonthly);
+        document.getElementById('heating-total').textContent = hasHeating ? formatFt(heatingMonthly) : '—';
         heatingPreview.textContent = hasHeating ? `Havi közüzemi díjelőleg: ${formatFt(heatingMonthly)} (az éves összeg 1/12-e).` : 'Ha üresen hagyod, nem számolunk fűtési díjelőleget.';
         renderMonthly({ commonTerrace, commonDwelling, renovationTerrace, renovationDwelling, otherFees, heatingMonthly, hasHeating, total });
       };
