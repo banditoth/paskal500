@@ -27,11 +27,12 @@
     a { color: inherit; }
     .shell { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
     .topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; }
-    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 750; letter-spacing: -.04em; }
+    .brand { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; text-decoration: none; font-weight: 750; letter-spacing: -.04em; }
     .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; background: var(--green); color: white; font-size: 14px; letter-spacing: -.07em; }
     .brand span:last-child { font-size: 17px; }
-    nav { display: flex; align-items: center; gap: 30px; color: var(--muted); font-size: 13px; font-weight: 600; }
-    nav a { text-decoration: none; }
+    nav { display: flex; align-items: center; gap: 17px; max-width: calc(100% - 170px); overflow-x: auto; color: var(--muted); font-size: 11px; font-weight: 650; scrollbar-width: none; }
+    nav::-webkit-scrollbar { display: none; }
+    nav a { flex: 0 0 auto; text-decoration: none; white-space: nowrap; }
     nav a:hover { color: var(--green); }
     .nav-pill { padding: 11px 16px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
     .hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.08fr .92fr; min-height: 510px; padding: 66px 70px; border-radius: 28px; background: var(--green); color: white; box-shadow: var(--shadow); }
@@ -44,7 +45,7 @@
     h1 { max-width: 540px; margin: 0; font-size: clamp(42px, 5vw, 64px); line-height: .99; letter-spacing: -.065em; font-weight: 730; }
     .hero-copy > p:not(.eyebrow) { max-width: 425px; margin: 23px 0 30px; color: #d8e2da; font-size: 15px; line-height: 1.75; }
     .actions { display: flex; flex-wrap: wrap; gap: 11px; }
-    .button { display: inline-flex; min-height: 47px; align-items: center; justify-content: center; gap: 9px; padding: 0 18px; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 700; transition: transform .2s, background .2s; }
+    .button { display: inline-flex; min-height: 47px; align-items: center; justify-content: center; gap: 9px; padding: 0 14px; border-radius: 999px; text-decoration: none; font-size: 11px; font-weight: 700; text-align: center; transition: transform .2s, background .2s; }
     .button:hover { transform: translateY(-2px); }
     .button-light { background: var(--lime); color: var(--green-dark); }
     .button-outline { border: 1px solid rgb(255 255 255 / 30%); color: white; }
@@ -184,13 +185,13 @@
     @media (max-width: 600px) {
       .shell { width: min(100% - 30px, 480px); }
       .topbar { height: 70px; }
-      nav { gap: 13px; }
-      nav a:first-child { display: none; }
+      nav { flex: 1 1 auto; gap: 13px; max-width: calc(100% - 145px); font-size: 10px; }
       .nav-pill { padding: 9px 12px; font-size: 11px; }
       .brand span:last-child { font-size: 15px; }
       .hero { display: block; min-height: auto; padding: 42px 28px 25px; border-radius: 22px; }
       h1 { font-size: 47px; }
       .hero-copy > p:not(.eyebrow) { font-size: 14px; }
+      .actions .button { min-height: 42px; padding: 0 12px; font-size: 10px; }
       .hero-art { min-height: 300px; transform: scale(.78); transform-origin: center top; margin-top: 22px; margin-bottom: -45px; }
       .section-head { display: block; margin: 58px 0 20px; }
       .section-note { margin-top: 12px; }
@@ -231,9 +232,11 @@
         <span class="brand-mark">P500</span><span>Paskál 500</span>
       </a>
       <nav aria-label="Fő navigáció">
-        <a href="#hibabejelentes">Hibabejelentés</a>
-        <a href="#rolam">Az oldalról</a>
-        <a class="nav-pill" href="#hibabejelentes">Hibát jelzek <span aria-hidden="true">↗</span></a>
+        <a href="#alapadatok">Alapadatok megadása</a>
+        <a href="#kozuzemieloleg">Közüzemi díjelőleg megadása</a>
+        <a href="#kozmu-elszamolas">Közműdíj elszámolás ellenőrző</a>
+        <a href="#kozos-koltseg">Közös költség kalkulátor</a>
+        <a class="nav-pill" href="#hibabejelentes">Hibabejelentés</a>
       </nav>
     </header>
 
@@ -241,11 +244,14 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">Paskál Park · L-500</p>
-          <h1 id="hero-title">Hasznos dolgok, egy helyen.</h1>
-          <p>Gyakorlati kalkulátorok és apró segédeszközök a Paskál Park L-500 Társasház lakóinak — egy lakótól, a mindennapokra.</p>
+          <h1 id="hero-title">Sziasztok Paskál Park lakók! 👋</h1>
+          <p>Ezen az oldalon a közös költséghez kapcsolódó dolgokat tudjátok kiszámolni.</p>
           <div class="actions">
-            <a class="button button-light" href="#hibabejelentes">Hibabejelentés <span aria-hidden="true">↓</span></a>
-            <a class="button button-outline" href="#rolam">Az oldal háttere</a>
+            <a class="button button-light" href="#alapadatok">Alapadatok megadása</a>
+            <a class="button button-outline" href="#kozuzemieloleg">Közüzemi díjelőleg megadása</a>
+            <a class="button button-outline" href="#kozmu-elszamolas">Közműdíj elszámolás ellenőrző</a>
+            <a class="button button-outline" href="#kozos-koltseg">Közös költség kalkulátor</a>
+            <a class="button button-outline" href="#hibabejelentes">Hibabejelentés</a>
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
@@ -264,10 +270,10 @@
         </div>
       </section>
 
-      <section class="ownership" aria-labelledby="ownership-title">
+      <section id="alapadatok" class="ownership" aria-labelledby="ownership-title">
         <div>
-          <p class="section-kicker">Személyes beállítás</p>
-          <h2 id="ownership-title">Ingatlanadataid</h2>
+          <p class="section-kicker">Alapadatok megadása</p>
+          <h2 id="ownership-title">Alapadatok megadása</h2>
           <p class="ownership-intro">Válaszd ki, hogy lakásról vagy iroda/üzletről van szó, majd add meg az alapterületet vagy a tulajdoni hányad számlálóját. A mezők automatikusan kiegészítik egymást. Az adatokat csak ezen a böngészőn, ezen az eszközön tároljuk; másik böngészőre vagy készülékre nem szinkronizálódnak.</p>
         </div>
         <div>
@@ -303,10 +309,10 @@
         </div>
       </section>
 
-      <section class="ownership heating-panel" aria-labelledby="heating-title">
+      <section id="kozuzemieloleg" class="ownership heating-panel" aria-labelledby="heating-title">
         <div>
           <p class="section-kicker">Közüzemi díjelőleg</p>
-          <h2 id="heating-title">Fűtési elszámolás</h2>
+          <h2 id="heating-title">Közüzemi díjelőleg megadása</h2>
           <p class="ownership-intro">Add meg az előző évi fűtési díjat, vagy ha az éves összeg nem ismert, a havi közüzemi díjelőleget. A két mező egymásból számolódik.</p>
         </div>
         <div>
@@ -329,9 +335,9 @@
         </div>
       </section>
 
-      <section class="fee-section" aria-labelledby="utility-title">
+      <section id="kozmu-elszamolas" class="fee-section" aria-labelledby="utility-title">
         <p class="section-kicker">Mérőóra-leolvasás</p>
-        <h2 id="utility-title">Közműdíj elszámolás</h2>
+        <h2 id="utility-title">Közműdíj elszámolás ellenőrző</h2>
         <p class="section-note">Add meg a nyitó és záró mérőállást. Az elszámolás a két állás különbségéből számol; az alapdíj becslése a lakás alapterületén alapul.</p>
         <div class="calc-guide">
           <strong>Számítás lépésről lépésre</strong>
@@ -375,9 +381,9 @@
         <p class="utility-message" id="utility-message">Az elszámolási különbözetből levonjuk az előző évi fűtési díjat, ha megadtad. Az új havi díjelőleg viszont a levonás előtti teljes közműdíj 1/12-e.</p>
       </section>
 
-      <section class="fee-section" aria-labelledby="fee-title">
+      <section id="kozos-koltseg" class="fee-section" aria-labelledby="fee-title">
         <p class="section-kicker">Becsült havi díjak</p>
-        <h2 id="fee-title">Közös költség és felújítási alap</h2>
+        <h2 id="fee-title">Közös költség kalkulátor</h2>
         <p class="section-note">Az alábbi sorok az ingatlanadataidból számított havi összegeket mutatják. A számítási szabályokat minden tételnél részletezzük.</p>
         <div class="calc-guide">
           <strong>Mitől változnak a közös költség és a felújítási alap tételei?</strong>
