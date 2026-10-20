@@ -80,6 +80,12 @@
     .utility-result strong { display: block; margin-top: 7px; font-size: 20px; letter-spacing: -.04em; }
     .utility-message { min-height: 18px; margin: 13px 0 0; color: var(--muted); font-size: 11px; }
     .meter-difference { min-height: 18px; margin: 12px 0 0; color: var(--green); font-size: 11px; font-weight: 650; line-height: 1.5; }
+    .calc-guide { margin: 16px 0 0; padding: 16px 18px; border: 1px solid #e3e5dc; border-radius: 13px; background: #f1f2ec; color: #58645d; font-size: 12px; line-height: 1.7; }
+    .calc-guide strong { display: block; margin-bottom: 5px; color: var(--green-dark); font-size: 12px; }
+    .calc-guide ul { margin: 6px 0 0; padding-left: 19px; }
+    .calc-guide p { margin: 5px 0 0; }
+    .heating-panel .calc-guide { border-color: rgb(255 255 255 / 18%); background: rgb(255 255 255 / 9%); color: #e1eae2; }
+    .heating-panel .calc-guide strong { color: white; }
     .ownership-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 14px; }
     .property-kind { margin: 0 0 18px; }
     .property-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 18px; }
@@ -236,7 +242,7 @@
         <div>
           <p class="section-kicker">Személyes beállítás</p>
           <h2 id="ownership-title">Ingatlanadataid</h2>
-          <p class="ownership-intro">Válaszd ki az ingatlan típusát, majd add meg az alapterületet vagy a tulajdoni hányad számlálóját. Az értékek ezen a böngészőn kerülnek mentésre.</p>
+          <p class="ownership-intro">Válaszd ki, hogy lakásról vagy iroda/üzletről van szó, majd add meg az alapterületet vagy a tulajdoni hányad számlálóját. A mezők automatikusan kiegészítik egymást. Az adatokat csak ezen a böngészőn, ezen az eszközön tároljuk; másik böngészőre vagy készülékre nem szinkronizálódnak.</p>
         </div>
         <div>
           <div class="property-kind field">
@@ -253,6 +259,18 @@
           </div>
           <div class="ownership-fields" id="primary-fields"></div>
           <p class="ownership-rate">Átváltás: 1 m² ≈ 4,84 / 100000 tulajdoni hányad, a 49 m² = 237 / 100000 példa alapján.</p>
+          <div class="calc-guide">
+            <strong>Hogyan számoljuk az alapterületet és a tulajdoni hányadot?</strong>
+            <ul>
+              <li>A fix nevező mindig <b>100000</b>; csak a számláló írható át.</li>
+              <li>Ha alapterületet írsz be: számláló = alapterület × 237 ÷ 49, egész számra kerekítve. Például 49 m² → 237/100000.</li>
+              <li>Ha a számlálót írod át: alapterület = számláló × 49 ÷ 237, két tizedesre kerekítve.</li>
+              <li>Ez a 49 m² = 237/100000 megadott példájából becsült arány, nem helyettesíti a hivatalos tulajdoni hányadot.</li>
+              <li>A lift beállítása a lakás közös költségére és felújítási alapjára hat. A terasz/erkély külön megadott mérete csak a teraszhoz kapcsolódó díjakat módosítja.</li>
+              <li>A tárolók terület alapján, a teremgarázs-helyek és felszíni beállók darabonként kerülnek a díjszámításba.</li>
+              <li>A beállítások és mérőállások a böngésző helyi tárhelyére kerülnek, nem a weboldal szerverére.</li>
+            </ul>
+          </div>
           <div class="extras-heading"><h3>Kiegészítő ingatlanrészek</h3><button class="add-extra" id="add-extra" type="button">＋ Hozzáadás</button></div>
           <div class="extra-list" id="extra-list"></div>
           <p class="ownership-status" id="ownership-status" aria-live="polite">A megadott adatok automatikusan mentődnek.</p>
@@ -269,6 +287,10 @@
           <label for="heating-annual">Előző évi összes fűtési díj</label>
           <div class="input-wrap"><input id="heating-annual" type="number" min="0" step="1" inputmode="numeric" placeholder="pl. 120000"><span class="unit">Ft / év</span></div>
           <p class="ownership-intro" id="heating-monthly-preview">Ha üresen hagyod, nincs levonandó előző évi fűtési díj.</p>
+          <div class="calc-guide">
+            <strong>Mire használjuk ezt az összeget?</strong>
+            <p>Ez az előző elszámolásból származó, már megfizetett fűtési díj. Ha megadod, egyszer levonjuk a mostani mérőállások és a gáz alapdíj alapján számított közmű-elszámolásból. Nem csökkenti az új havi előleget: azt a teljes, levonás előtti elszámolási összegből számoljuk.</p>
+          </div>
         </div>
       </section>
 
@@ -276,6 +298,19 @@
         <p class="section-kicker">Mérőóra-leolvasás</p>
         <h2 id="utility-title">Közműdíj elszámolás</h2>
         <p class="section-note">Add meg a nyitó és záró mérőállást. Az elszámolás a két állás különbségéből számol; az alapdíj becslése a lakás alapterületén alapul.</p>
+        <div class="calc-guide">
+          <strong>Számítás lépésről lépésre</strong>
+          <ul>
+            <li><b>Hőmennyiségmérő:</b> záró MWh − nyitó MWh = fogyasztás; fogyasztás × 11 111 Ft/MWh = hődíj.</li>
+            <li><b>Melegvízóra:</b> záró m³ − nyitó m³ = fogyasztás; fogyasztás × 556 Ft/m³ = melegvízdíj.</li>
+            <li><b>Gáz alapdíj becslése:</b> lakás alapterülete × (13 915 Ft ÷ 49,49 m²). Ez a megadott 49,49 m²-es példából arányosítja a társasház teljes gázfogyasztásának 25%-aként megadott alapdíjat.</li>
+            <li><b>Összes közműdíj:</b> hődíj + melegvízdíj + gáz alapdíj. A teljes összeghez mindkét mérő mindkét állását és a lakás alapterületét meg kell adni.</li>
+            <li><b>Elszámolási különbözet:</b> összes közműdíj − előző évi fűtési díj. Ha nincs megadva előző évi díj, nincs levonás. A negatív eredmény túlfizetést jelez.</li>
+            <li><b>Új havi közüzemi díjelőleg:</b> a levonás előtti összes közműdíj ÷ 12. Az előző évi fűtési díjat ebből nem vonjuk le.</li>
+          </ul>
+          <p>A különbség és díj mérőóránként közvetlenül a nyitó/záró mezők alatt jelenik meg. Ha a záró állás kisebb a nyitónál, az adott mérő értéke hibás, és a teljes elszámolás nem számolható ki.</p>
+          <p>A forintösszegek megjelenítéskor egész forintra kerekülnek. A gáz alapdíj a megadott 49,49 m²-es példából számított becslés.</p>
+        </div>
         <div class="utility-meters">
           <div class="utility-meter">
             <h3>Hőmennyiségmérő</h3>
@@ -308,7 +343,20 @@
       <section class="fee-section" aria-labelledby="fee-title">
         <p class="section-kicker">Becsült havi díjak</p>
         <h2 id="fee-title">Közös költség és felújítási alap</h2>
-        <p class="section-note">A tételek az ingatlanadataid alapján számolódnak. A teremgarázs-hely és a felszíni beálló darabként számít; a terasz felára az ingatlan megadott alapterületére vonatkozik.</p>
+        <p class="section-note">Az alábbi sorok az ingatlanadataidból számított havi összegeket mutatják. A számítási szabályokat minden tételnél részletezzük.</p>
+        <div class="calc-guide">
+          <strong>Mitől változnak a közös költség és a felújítási alap tételei?</strong>
+          <ul>
+            <li><b>Közös költség lakás/iroda:</b> alapterület × 330 Ft/m². Ha bejelölöd a liftes épületet, ehhez hozzáadódik alapterület × 30 Ft/m². A zöld „Közös költség lakás” összeg ezt a két tételt együtt mutatja.</li>
+            <li><b>Közös költség terasz:</b> külön megadott terasz/erkély alapterület × 165 Ft/m². Ha nincs bejelölve terasz/erkély, ez 0 Ft.</li>
+            <li><b>Felújítási alap lakás/üzlet:</b> alapterület × 15 Ft/m². Liftes épületnél ehhez hozzáadódik alapterület × 10 Ft/m². A zöld „Felújítási alap lakás” összeg a két tételt együtt mutatja.</li>
+            <li><b>Felújítási alap terasz:</b> külön megadott terasz/erkély alapterület × 8 Ft/m².</li>
+            <li><b>Tároló:</b> közös költség 150 Ft/m² és felújítási alap 10 Ft/m², a tárolók összesített alapterületére.</li>
+            <li><b>Teremgarázs-hely:</b> közös költség 3 250 Ft/db és felújítási alap 250 Ft/db.</li>
+            <li><b>Felszíni beálló:</b> közös költség 2 200 Ft/db és felújítási alap 150 Ft/db.</li>
+            <li>A részletes táblázat minden tarifát, mennyiséget és tételösszeget külön sorban mutatja. A zöld kártyák összevonják a lakás és lift tételeit; az „Egyéb díjak” a tárolók és parkolóhelyek díjainak összege.</li>
+          </ul>
+        </div>
         <div class="fee-table-wrap">
           <table class="fee-table">
             <thead><tr><th>Tétel</th><th>Egységár</th><th>Mennyiség</th><th>Összeg / hó</th></tr></thead>
@@ -327,6 +375,10 @@
           <div class="field"><label for="period-start">Kezdő hónap</label><input id="period-start" type="month" min="2025-01"></div>
           <div class="field"><label for="period-end">Záró hónap</label><input id="period-end" type="month" min="2025-01"></div>
           <p class="period-hint" id="period-hint" aria-live="polite">Válassz időszakot 2025. január és a mai hónap között. Legfeljebb 12 hónap jelölhető ki.</p>
+        </div>
+        <div class="calc-guide">
+          <strong>Hogyan készül a havi bontás?</strong>
+          <p>A kezdő és záró hónap is beleszámít az időszakba, így például januártól márciusig 3 hónap jelenik meg. Legfeljebb 12 egymást követő hónap választható. Minden sor a most megadott ingatlanadatokkal és aktuális díjakkal számolt havi összeget ismétli; nem korábbi hónapok tényleges számláit vagy régi díjtételeit rekonstruálja. Az időszaki sor az egyes oszlopok havi összegét megszorozza a hónapok számával.</p>
         </div>
         <h3 class="monthly-heading">Havi bontás</h3>
         <div class="monthly-table-wrap">
