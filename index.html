@@ -103,7 +103,7 @@
     .fee-table tbody tr:last-child td { border-bottom: 0; }
     .fee-table td:last-child, .fee-table th:last-child { text-align: right; }
     .fee-table .fee-total td { background: #edf1e5; color: var(--green-dark); font-weight: 800; }
-    .fee-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .fee-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-top: 18px; }
     .fee-total-card { padding: 18px; border-radius: 14px; background: var(--green); color: white; }
     .fee-total-card span { display: block; color: #d9e7d6; font-size: 11px; }
     .fee-total-card strong { display: block; margin-top: 7px; font-size: 25px; letter-spacing: -.04em; }
@@ -249,13 +249,16 @@
         <p class="section-note">A tételek az ingatlanadataid alapján számolódnak. A teremgarázs-hely és a felszíni beálló darabként számít; a terasz felára az ingatlan megadott alapterületére vonatkozik.</p>
         <div class="fee-table-wrap">
           <table class="fee-table">
-            <thead><tr><th>Havi tétel</th><th>Számítás alapja</th><th>Összeg / hó</th></tr></thead>
+            <thead><tr><th>Tétel</th><th>Egységár</th><th>Mennyiség</th><th>Összeg / hó</th></tr></thead>
             <tbody id="fee-rows"></tbody>
           </table>
         </div>
         <div class="fee-breakdown">
-          <div class="fee-total-card"><span>Közös költség összesen</span><strong id="common-total">—</strong></div>
-          <div class="fee-total-card"><span>Felújítási alap összesen</span><strong id="renovation-total">—</strong></div>
+          <div class="fee-total-card"><span>Közös költség terasz</span><strong id="common-terrace-total">—</strong></div>
+          <div class="fee-total-card"><span>Közös költség lakás</span><strong id="common-dwelling-total">—</strong></div>
+          <div class="fee-total-card"><span>Felújítási alap terasz</span><strong id="renovation-terrace-total">—</strong></div>
+          <div class="fee-total-card"><span>Felújítási alap lakás</span><strong id="renovation-dwelling-total">—</strong></div>
+          <div class="fee-total-card"><span>Egyéb díjak</span><strong id="other-fees-total">—</strong></div>
         </div>
         <div class="period-controls" aria-label="Havi bontás időszaka">
           <div class="field"><label for="period-start">Kezdő hónap</label><input id="period-start" type="month" min="2025-01"></div>
@@ -399,17 +402,26 @@
         const renovation = renovationDwelling + renovationTerrace + renovationExtras;
         const otherFees = commonExtras + renovationExtras;
         const total = commonTerrace + commonDwelling + renovationTerrace + renovationDwelling + otherFees;
-        const rows = [
-          [`Közös költség lakás (${isOffice ? 'iroda/üzlet' : 'lakás'}${hasElevator.checked ? ', liftdíjjal' : ''})`, `${mainArea.toLocaleString('hu-HU')} m² × ${hasElevator.checked ? '360' : '330'} Ft/m²`, commonDwelling],
-          ['Közös költség terasz', `${terraceSquareMeters.toLocaleString('hu-HU')} m² × 165 Ft/m²`, commonTerrace],
-          [`Felújítási alap lakás (${isOffice ? 'üzlet' : 'lakás'}${hasElevator.checked ? ', liftfelárral' : ''})`, `${mainArea.toLocaleString('hu-HU')} m² × ${hasElevator.checked ? '25' : '15'} Ft/m²`, renovationDwelling],
-          ['Felújítási alap terasz', `${terraceSquareMeters.toLocaleString('hu-HU')} m² × 8 Ft/m²`, renovationTerrace],
-          ['Egyéb közös költségek', `Tároló: ${storageArea.toLocaleString('hu-HU')} m² × 150; teremgarázs: ${garage.length} db × 3 250; felszíni: ${outdoor.length} db × 2 200 Ft`, commonExtras],
-          ['Egyéb felújítási alap', `Tároló: ${storageArea.toLocaleString('hu-HU')} m² × 10; teremgarázs: ${garage.length} db × 250; felszíni: ${outdoor.length} db × 150 Ft`, renovationExtras],
-        ];
-        feeRows.innerHTML = `${rows.map((row) => `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${formatFt(row[2])}</td></tr>`).join('')}<tr class="fee-total"><td colspan="2">Havi összesen</td><td>${formatFt(total)}</td></tr>`;
-        document.getElementById('common-total').textContent = formatFt(common);
-        document.getElementById('renovation-total').textContent = formatFt(renovation);
+        const rows = [];
+        const add = (name, rate, quantity, unitLabel) => rows.push({ name, rate, quantity, unitLabel, amount: rate * quantity });
+        add(`Közös költség alap (${isOffice ? 'iroda/üzlet' : 'lakás'})`, 330, mainArea, 'm²');
+        add('Közös költség lift felár', 30, hasElevator.checked ? mainArea : 0, 'm²');
+        add('Közös költség terasz / erkély felár', 165, terraceSquareMeters, 'm²');
+        add(`Felújítási alap (${isOffice ? 'üzlet' : 'lakás'})`, 15, mainArea, 'm²');
+        add('Felújítási alap lift felár', 10, hasElevator.checked ? mainArea : 0, 'm²');
+        add('Felújítási alap terasz felár', 8, terraceSquareMeters, 'm²');
+        add('Tároló közös költség', 150, storageArea, 'm²');
+        add('Tároló felújítási alap', 10, storageArea, 'm²');
+        add('Teremgarázs közös költség', 3250, garage.length, 'db');
+        add('Teremgarázs felújítási alap', 250, garage.length, 'db');
+        add('Felszíni beálló közös költség', 2200, outdoor.length, 'db');
+        add('Felszíni beálló felújítási alap', 150, outdoor.length, 'db');
+        feeRows.innerHTML = `${rows.map((row) => `<tr><td>${row.name}</td><td>${formatFt(row.rate)} / ${row.unitLabel}</td><td>${Number(row.quantity.toFixed(2)).toLocaleString('hu-HU')} ${row.unitLabel}</td><td>${formatFt(row.amount)}</td></tr>`).join('')}<tr class="fee-total"><td colspan="3">Havi összesen</td><td>${formatFt(total)}</td></tr>`;
+        document.getElementById('common-terrace-total').textContent = formatFt(commonTerrace);
+        document.getElementById('common-dwelling-total').textContent = formatFt(commonDwelling);
+        document.getElementById('renovation-terrace-total').textContent = formatFt(renovationTerrace);
+        document.getElementById('renovation-dwelling-total').textContent = formatFt(renovationDwelling);
+        document.getElementById('other-fees-total').textContent = formatFt(otherFees);
         renderMonthly({ commonTerrace, commonDwelling, renovationTerrace, renovationDwelling, otherFees, total });
       };
       const makeUnit = (data = {}) => ({ type: data.type || 'Lakás', area: data.area || '', numerator: data.numerator || '' });
