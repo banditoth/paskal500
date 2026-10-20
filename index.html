@@ -107,6 +107,19 @@
     .fee-total-card { padding: 18px; border-radius: 14px; background: var(--green); color: white; }
     .fee-total-card span { display: block; color: #d9e7d6; font-size: 11px; }
     .fee-total-card strong { display: block; margin-top: 7px; font-size: 25px; letter-spacing: -.04em; }
+    .period-controls { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .period-controls .field { min-width: 145px; }
+    .period-controls input { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #dcded5; border-radius: 10px; background: white; color: var(--ink); font: inherit; }
+    .period-hint { flex: 1 1 100%; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .period-error { color: #9b4d31; }
+    .monthly-heading { margin: 30px 0 0; font-size: 18px; letter-spacing: -.03em; }
+    .monthly-table-wrap { overflow-x: auto; margin-top: 13px; border: 1px solid var(--line); border-radius: 13px; }
+    .monthly-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    .monthly-table th, .monthly-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .monthly-table th { background: #f1f2ec; color: #58645d; font-size: 10px; }
+    .monthly-table td:not(:first-child), .monthly-table th:not(:first-child) { text-align: right; }
+    .monthly-table tbody tr:last-child td { border-bottom: 0; }
+    .monthly-table .period-total td { background: #edf1e5; color: var(--green-dark); font-weight: 800; }
     .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .tool-card { display: flex; min-height: 230px; flex-direction: column; padding: 25px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); transition: transform .2s, box-shadow .2s; }
     .tool-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
@@ -146,6 +159,8 @@
       .fee-section { margin-top: 30px; padding: 25px 18px; }
       .fee-section h2 { font-size: 24px; }
       .fee-breakdown { grid-template-columns: 1fr; }
+      .period-controls { align-items: stretch; flex-direction: column; }
+      .period-controls .field { width: 100%; }
       .ownership h2 { font-size: 26px; }
       .ownership-fields { grid-template-columns: 1fr; gap: 10px; }
       .property-options { grid-template-columns: 1fr; gap: 8px; }
@@ -242,6 +257,18 @@
           <div class="fee-total-card"><span>Közös költség összesen</span><strong id="common-total">—</strong></div>
           <div class="fee-total-card"><span>Felújítási alap összesen</span><strong id="renovation-total">—</strong></div>
         </div>
+        <div class="period-controls" aria-label="Havi bontás időszaka">
+          <div class="field"><label for="period-start">Kezdő hónap</label><input id="period-start" type="month" min="2025-01"></div>
+          <div class="field"><label for="period-end">Záró hónap</label><input id="period-end" type="month" min="2025-01"></div>
+          <p class="period-hint" id="period-hint" aria-live="polite">Válassz időszakot 2025. január és a mai hónap között. Legfeljebb 12 hónap jelölhető ki.</p>
+        </div>
+        <h3 class="monthly-heading">Havi bontás</h3>
+        <div class="monthly-table-wrap">
+          <table class="monthly-table">
+            <thead><tr><th>Hónap</th><th>Közös költség</th><th>Felújítási alap</th><th>Havi összesen</th></tr></thead>
+            <tbody id="monthly-rows"></tbody>
+          </table>
+        </div>
       </section>
 
       <section id="eszkozok" aria-labelledby="tools-title">
@@ -298,11 +325,19 @@
       const terraceArea = document.getElementById('terrace-area');
       const terraceAreaField = document.getElementById('terrace-area-field');
       const feeRows = document.getElementById('fee-rows');
+      const periodStart = document.getElementById('period-start');
+      const periodEnd = document.getElementById('period-end');
+      const periodHint = document.getElementById('period-hint');
+      const monthlyRows = document.getElementById('monthly-rows');
       const storageKey = 'paskal500.ownership.v2';
       const referenceArea = 49;
       const referenceNumerator = 237;
       const referenceDenominator = 100000;
       const extras = ['Tároló', 'Teremgarázs hely', 'Felszíni beálló'];
+      const minMonth = '2025-01';
+      const today = new Date();
+      const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+      const monthFormatter = new Intl.DateTimeFormat('hu-HU', { year: 'numeric', month: 'long' });
       let units = [];
       const save = (announce = true) => {
         try {
@@ -314,6 +349,31 @@
         }
       };
       const formatFt = (value) => `${Math.round(value).toLocaleString('hu-HU')} Ft`;
+      const monthIndex = (month) => {
+        const [year, number] = month.split('-').map(Number);
+        return year * 12 + number - 1;
+      };
+      const renderMonthly = (common, renovation) => {
+        const start = periodStart.value;
+        const end = periodEnd.value;
+        const count = start && end ? monthIndex(end) - monthIndex(start) + 1 : 0;
+        const valid = start >= minMonth && start <= currentMonth && end >= minMonth && end <= currentMonth && count > 0 && count <= 12;
+        if (!valid) {
+          monthlyRows.replaceChildren();
+          periodHint.textContent = count > 12 ? 'Az időszak legfeljebb 12 hónap lehet.' : 'Válassz érvényes, 2025. január és a mai hónap közé eső időszakot.';
+          periodHint.classList.add('period-error');
+          return;
+        }
+        periodHint.textContent = `${count} hónap kiválasztva.`;
+        periodHint.classList.remove('period-error');
+        const rows = [];
+        for (let index = monthIndex(start); index <= monthIndex(end); index += 1) {
+          const date = new Date(Math.floor(index / 12), index % 12, 1);
+          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(common)}</td><td>${formatFt(renovation)}</td><td>${formatFt(common + renovation)}</td></tr>`);
+        }
+        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(common * count)}</td><td>${formatFt(renovation * count)}</td><td>${formatFt((common + renovation) * count)}</td></tr>`);
+        monthlyRows.innerHTML = rows.join('');
+      };
       const updateFees = () => {
         const mainArea = Number(units[0]?.area) || 0;
         const isOffice = propertyKind.value === 'iroda/üzlet';
@@ -347,6 +407,7 @@
         feeRows.innerHTML = `${rows.map(renderRow).join('')}<tr class="fee-total"><td colspan="3">Havi összesen</td><td>${formatFt(common + renovation)}</td></tr>`;
         document.getElementById('common-total').textContent = formatFt(common);
         document.getElementById('renovation-total').textContent = formatFt(renovation);
+        renderMonthly(common, renovation);
       };
       const makeUnit = (data = {}) => ({ type: data.type || 'Lakás', area: data.area || '', numerator: data.numerator || '' });
       const createCalculator = (unit, prefix, isExtra = false) => {
@@ -397,6 +458,14 @@
         save(); updateFees();
       });
       terraceArea.addEventListener('input', () => { save(); updateFees(); });
+      periodStart.addEventListener('change', updateFees);
+      periodEnd.addEventListener('change', updateFees);
+      const lastTwelveStartIndex = Math.max(monthIndex(minMonth), monthIndex(currentMonth) - 11);
+      const initialStart = `${Math.floor(lastTwelveStartIndex / 12)}-${String(lastTwelveStartIndex % 12 + 1).padStart(2, '0')}`;
+      periodStart.min = minMonth; periodStart.max = currentMonth;
+      periodEnd.min = minMonth; periodEnd.max = currentMonth;
+      periodStart.value = initialStart;
+      periodEnd.value = currentMonth;
       try {
         const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
         if (saved && Array.isArray(saved.units) && saved.units.length) {
