@@ -60,6 +60,8 @@
     .sun { position: absolute; width: 81px; height: 81px; right: 8px; top: 24px; border-radius: 50%; background: #e5c486; opacity: .95; }
     .spark { position: absolute; right: 9%; bottom: 13%; color: var(--lime); font-size: 25px; }
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin: 74px 0 24px; }
+    .report-section { margin: 74px 0; padding: 30px 34px; border: 1px solid var(--line); border-radius: 20px; background: var(--white); }
+    .report-section .section-head { margin: 0 0 20px; }
     .section-kicker { margin: 0 0 10px; color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
     h2 { margin: 0; font-size: clamp(28px, 3vw, 38px); letter-spacing: -.055em; line-height: 1.08; }
     .section-note { max-width: 330px; margin: 0 0 2px; color: var(--muted); font-size: 13px; line-height: 1.65; }
@@ -180,6 +182,8 @@
       .fee-section { margin-top: 30px; padding: 25px 18px; }
       .fee-section h2 { font-size: 24px; }
       .fee-breakdown { grid-template-columns: 1fr; }
+      .report-section { margin: 58px 0; padding: 24px 20px; }
+      .report-section .section-head { display: block; }
       .utility-meters { grid-template-columns: 1fr; }
       .utility-results { grid-template-columns: 1fr; }
       .period-controls { align-items: stretch; flex-direction: column; }
@@ -206,9 +210,9 @@
         <span class="brand-mark">P500</span><span>Paskál 500</span>
       </a>
       <nav aria-label="Fő navigáció">
-        <a href="#eszkozok">Eszközök</a>
+        <a href="#hibabejelentes">Hibabejelentés</a>
         <a href="#rolam">Az oldalról</a>
-        <a class="nav-pill" href="#eszkozok">Felfedezem <span aria-hidden="true">↗</span></a>
+        <a class="nav-pill" href="#hibabejelentes">Hibát jelzek <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
 
@@ -219,7 +223,7 @@
           <h1 id="hero-title">Hasznos dolgok, egy helyen.</h1>
           <p>Gyakorlati kalkulátorok és apró segédeszközök a Paskál Park L-500 Társasház lakóinak — egy lakótól, a mindennapokra.</p>
           <div class="actions">
-            <a class="button button-light" href="#eszkozok">Eszközök megtekintése <span aria-hidden="true">↓</span></a>
+            <a class="button button-light" href="#hibabejelentes">Hibabejelentés <span aria-hidden="true">↓</span></a>
             <a class="button button-outline" href="#rolam">Az oldal háttere</a>
           </div>
         </div>
@@ -400,31 +404,12 @@
         </div>
       </section>
 
-      <section id="eszkozok" aria-labelledby="tools-title">
+      <section id="hibabejelentes" class="report-section" aria-labelledby="report-title">
         <div class="section-head">
-          <div><p class="section-kicker">Lakóként, lakóknak</p><h2 id="tools-title">Eszközök és kalkulátorok</h2></div>
-          <p class="section-note">Az oldalon hasznos, könnyen elérhető segédeszközök gyűjteménye kap helyet.</p>
+          <div><p class="section-kicker">Visszajelzés</p><h2 id="report-title">Hibabejelentés</h2></div>
+          <p class="section-note">Hibát találtál az oldalon vagy valamelyik számításban? Írj e-mailt, és írd le röviden, mit tapasztaltál.</p>
         </div>
-        <div class="tools">
-          <article class="tool-card">
-            <div class="tool-icon" aria-hidden="true">⌗</div>
-            <h3>Közös költség kalkulátor</h3>
-            <p>A közös költség és az egyes tételek gyors áttekintéséhez.</p>
-            <span class="soon">Hamarosan</span>
-          </article>
-          <article class="tool-card">
-            <div class="tool-icon" aria-hidden="true">◷</div>
-            <h3>Fogyasztás kalkulátor</h3>
-            <p>Egyszerű számítások és becslések a háztartási fogyasztáshoz.</p>
-            <span class="soon">Hamarosan</span>
-          </article>
-          <article class="tool-card">
-            <div class="tool-icon" aria-hidden="true">＋</div>
-            <h3>További eszközök</h3>
-            <p>A gyűjtemény a lakók mindennapi igényei szerint bővülhet.</p>
-            <span class="soon">Új eszközök készülnek</span>
-          </article>
-        </div>
+        <a class="button button-light" href="mailto:paskal500@bitfox.hu">paskal500@bitfox.hu</a>
       </section>
 
       <section id="rolam" class="about" aria-labelledby="about-title">
