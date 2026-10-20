@@ -158,12 +158,27 @@
     .about-copy strong { color: var(--ink); }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0 30px; border-top: 1px solid var(--line); color: #818982; font-size: 11px; }
     .footer-brand { color: var(--green); font-weight: 750; }
+    :focus-visible { outline: 3px solid #d88551; outline-offset: 3px; }
+    .topbar { gap: 20px; }
+    .ownership { align-items: start; }
+    .ownership > div:first-child { position: sticky; top: 24px; }
+    .fee-section { margin-top: 36px; padding: 34px; box-shadow: 0 10px 30px rgb(35 49 42 / 3%); }
+    .fee-section > .section-kicker:first-child { margin-bottom: 9px; }
+    .fee-section .calc-guide { margin-top: 18px; }
+    .fee-table-wrap, .monthly-table-wrap { box-shadow: 0 4px 16px rgb(35 49 42 / 3%); }
+    .about { display: block; margin: 40px 0 28px; padding: 24px 30px; }
+    .about-copy p { margin: 0; }
+    .report-section { box-shadow: 0 10px 30px rgb(35 49 42 / 4%); }
+    .report-section .section-note { max-width: 620px; }
+    .utility-message { padding: 0 2px; }
     @media (max-width: 800px) {
       .hero { grid-template-columns: 1fr .75fr; padding: 50px 40px; }
       .hero-art { transform: scale(.82); transform-origin: center right; }
       .tools { grid-template-columns: repeat(2, 1fr); }
       .about { gap: 28px; }
       .ownership { grid-template-columns: 1fr; gap: 24px; }
+      .ownership > div:first-child { position: static; }
+      .fee-section { padding: 28px; }
     }
     @media (max-width: 600px) {
       .shell { width: min(100% - 30px, 480px); }
@@ -179,13 +194,16 @@
       .section-head { display: block; margin: 58px 0 20px; }
       .section-note { margin-top: 12px; }
       .ownership { gap: 20px; margin-top: 58px; padding: 26px 22px; }
-      .fee-section { margin-top: 30px; padding: 25px 18px; }
+      .heating-inputs { grid-template-columns: 1fr; }
+      .fee-section { margin-top: 24px; padding: 24px 18px; border-radius: 18px; }
       .fee-section h2 { font-size: 24px; }
       .fee-breakdown { grid-template-columns: 1fr; }
       .report-section { margin: 58px 0; padding: 24px 20px; }
       .report-section .section-head { display: block; }
       .utility-meters { grid-template-columns: 1fr; }
-      .utility-results { grid-template-columns: 1fr; }
+      .utility-results { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+      .utility-result { padding: 13px; }
+      .utility-result strong { font-size: 17px; }
       .period-controls { align-items: stretch; flex-direction: column; }
       .period-controls .field { width: 100%; }
       .ownership h2 { font-size: 26px; }
@@ -197,7 +215,8 @@
       .tools { grid-template-columns: 1fr; gap: 11px; }
       .tool-card { min-height: 195px; padding: 21px; }
       .about { display: block; margin: 60px 0; padding: 27px 24px; }
-      .about-copy { margin-top: 20px; }
+      .about { margin: 30px 0 20px; padding: 20px; }
+      .about-copy { margin-top: 0; }
       footer { align-items: flex-start; flex-direction: column; gap: 7px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
