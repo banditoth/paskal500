@@ -249,7 +249,7 @@
         <p class="section-note">A tételek az ingatlanadataid alapján számolódnak. A teremgarázs-hely és a felszíni beálló darabként számít; a terasz felára az ingatlan megadott alapterületére vonatkozik.</p>
         <div class="fee-table-wrap">
           <table class="fee-table">
-            <thead><tr><th>Tétel</th><th>Egységár</th><th>Mennyiség</th><th>Összeg / hó</th></tr></thead>
+            <thead><tr><th>Havi tétel</th><th>Számítás alapja</th><th>Összeg / hó</th></tr></thead>
             <tbody id="fee-rows"></tbody>
           </table>
         </div>
@@ -265,7 +265,7 @@
         <h3 class="monthly-heading">Havi bontás</h3>
         <div class="monthly-table-wrap">
           <table class="monthly-table">
-            <thead><tr><th>Hónap</th><th>Közös költség</th><th>Felújítási alap</th><th>Havi összesen</th></tr></thead>
+            <thead><tr><th>Hónap</th><th>Közös költség terasz</th><th>Közös költség lakás</th><th>Felújítási alap terasz</th><th>Felújítási alap lakás</th><th>Egyéb díjak</th><th>Havi összesen</th></tr></thead>
             <tbody id="monthly-rows"></tbody>
           </table>
         </div>
@@ -353,7 +353,7 @@
         const [year, number] = month.split('-').map(Number);
         return year * 12 + number - 1;
       };
-      const renderMonthly = (common, renovation) => {
+      const renderMonthly = (fees) => {
         const start = periodStart.value;
         const end = periodEnd.value;
         const count = start && end ? monthIndex(end) - monthIndex(start) + 1 : 0;
@@ -369,9 +369,9 @@
         const rows = [];
         for (let index = monthIndex(start); index <= monthIndex(end); index += 1) {
           const date = new Date(Math.floor(index / 12), index % 12, 1);
-          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(common)}</td><td>${formatFt(renovation)}</td><td>${formatFt(common + renovation)}</td></tr>`);
+          rows.push(`<tr><td>${monthFormatter.format(date)}</td><td>${formatFt(fees.commonTerrace)}</td><td>${formatFt(fees.commonDwelling)}</td><td>${formatFt(fees.renovationTerrace)}</td><td>${formatFt(fees.renovationDwelling)}</td><td>${formatFt(fees.otherFees)}</td><td>${formatFt(fees.total)}</td></tr>`);
         }
-        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(common * count)}</td><td>${formatFt(renovation * count)}</td><td>${formatFt((common + renovation) * count)}</td></tr>`);
+        rows.push(`<tr class="period-total"><td>${count} hónap összesen</td><td>${formatFt(fees.commonTerrace * count)}</td><td>${formatFt(fees.commonDwelling * count)}</td><td>${formatFt(fees.renovationTerrace * count)}</td><td>${formatFt(fees.renovationDwelling * count)}</td><td>${formatFt(fees.otherFees * count)}</td><td>${formatFt(fees.total * count)}</td></tr>`);
         monthlyRows.innerHTML = rows.join('');
       };
       const updateFees = () => {
@@ -381,33 +381,36 @@
         const storage = extrasByType('Tároló');
         const garage = extrasByType('Teremgarázs hely');
         const outdoor = extrasByType('Felszíni beálló');
-        const rows = [];
-        let common = 0;
-        let renovation = 0;
-        const add = (name, rate, quantity, target, unitLabel) => {
-          const amount = rate * quantity;
-          if (target === 'common') common += amount; else renovation += amount;
-          rows.push({ name, rate, quantity, amount, unitLabel });
-        };
-        add(`Közös költség alap (${isOffice ? 'iroda/üzlet' : 'lakás'})`, 330, mainArea, 'common', 'm²');
-        add('Közös költség lift felár', 30, hasElevator.checked ? mainArea : 0, 'common', 'm²');
         const terraceSquareMeters = hasTerrace.checked ? (Number(terraceArea.value) || 0) : 0;
-        add('Közös költség terasz / erkély felár', 165, terraceSquareMeters, 'common', 'm²');
-        add(`Felújítási alap (${isOffice ? 'üzlet' : 'lakás'})`, 15, mainArea, 'renovation', 'm²');
-        add('Felújítási alap lift felár', 10, hasElevator.checked ? mainArea : 0, 'renovation', 'm²');
-        add('Felújítási alap terasz felár', 8, terraceSquareMeters, 'renovation', 'm²');
         const storageArea = storage.reduce((sum, unit) => sum + (Number(unit.area) || 0), 0);
-        add('Tároló közös költség', 150, storageArea, 'common', 'm²');
-        add('Tároló felújítási alap', 10, storageArea, 'renovation', 'm²');
-        add('Teremgarázs közös költség', 3250, garage.length, 'common', 'db');
-        add('Teremgarázs felújítási alap', 250, garage.length, 'renovation', 'db');
-        add('Felszíni beálló közös költség', 2200, outdoor.length, 'common', 'db');
-        add('Felszíni beálló felújítási alap', 150, outdoor.length, 'renovation', 'db');
-        const renderRow = (row) => `<tr><td>${row.name}</td><td>${formatFt(row.rate)} / ${row.unitLabel}</td><td>${Number(row.quantity.toFixed(2)).toLocaleString('hu-HU')} ${row.unitLabel}</td><td>${formatFt(row.amount)}</td></tr>`;
-        feeRows.innerHTML = `${rows.map(renderRow).join('')}<tr class="fee-total"><td colspan="3">Havi összesen</td><td>${formatFt(common + renovation)}</td></tr>`;
+        const commonDwelling = mainArea * (330 + (hasElevator.checked ? 30 : 0));
+        const commonTerrace = terraceSquareMeters * 165;
+        const renovationDwelling = mainArea * (15 + (hasElevator.checked ? 10 : 0));
+        const renovationTerrace = terraceSquareMeters * 8;
+        const commonStorage = storageArea * 150;
+        const renovationStorage = storageArea * 10;
+        const commonGarage = garage.length * 3250;
+        const renovationGarage = garage.length * 250;
+        const commonOutdoor = outdoor.length * 2200;
+        const renovationOutdoor = outdoor.length * 150;
+        const commonExtras = commonStorage + commonGarage + commonOutdoor;
+        const renovationExtras = renovationStorage + renovationGarage + renovationOutdoor;
+        const common = commonDwelling + commonTerrace + commonExtras;
+        const renovation = renovationDwelling + renovationTerrace + renovationExtras;
+        const otherFees = commonExtras + renovationExtras;
+        const total = commonTerrace + commonDwelling + renovationTerrace + renovationDwelling + otherFees;
+        const rows = [
+          [`Közös költség lakás (${isOffice ? 'iroda/üzlet' : 'lakás'}${hasElevator.checked ? ', liftdíjjal' : ''})`, `${mainArea.toLocaleString('hu-HU')} m² × ${hasElevator.checked ? '360' : '330'} Ft/m²`, commonDwelling],
+          ['Közös költség terasz', `${terraceSquareMeters.toLocaleString('hu-HU')} m² × 165 Ft/m²`, commonTerrace],
+          [`Felújítási alap lakás (${isOffice ? 'üzlet' : 'lakás'}${hasElevator.checked ? ', liftfelárral' : ''})`, `${mainArea.toLocaleString('hu-HU')} m² × ${hasElevator.checked ? '25' : '15'} Ft/m²`, renovationDwelling],
+          ['Felújítási alap terasz', `${terraceSquareMeters.toLocaleString('hu-HU')} m² × 8 Ft/m²`, renovationTerrace],
+          ['Egyéb közös költségek', `Tároló: ${storageArea.toLocaleString('hu-HU')} m² × 150; teremgarázs: ${garage.length} db × 3 250; felszíni: ${outdoor.length} db × 2 200 Ft`, commonExtras],
+          ['Egyéb felújítási alap', `Tároló: ${storageArea.toLocaleString('hu-HU')} m² × 10; teremgarázs: ${garage.length} db × 250; felszíni: ${outdoor.length} db × 150 Ft`, renovationExtras],
+        ];
+        feeRows.innerHTML = `${rows.map((row) => `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${formatFt(row[2])}</td></tr>`).join('')}<tr class="fee-total"><td colspan="2">Havi összesen</td><td>${formatFt(total)}</td></tr>`;
         document.getElementById('common-total').textContent = formatFt(common);
         document.getElementById('renovation-total').textContent = formatFt(renovation);
-        renderMonthly(common, renovation);
+        renderMonthly({ commonTerrace, commonDwelling, renovationTerrace, renovationDwelling, otherFees, total });
       };
       const makeUnit = (data = {}) => ({ type: data.type || 'Lakás', area: data.area || '', numerator: data.numerator || '' });
       const createCalculator = (unit, prefix, isExtra = false) => {
