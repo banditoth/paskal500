@@ -278,6 +278,10 @@
         </div>
         <div>
           <div class="property-kind field">
+            <label for="building-select">Épület</label>
+            <div class="select-wrap"><select id="building-select"><option value="B">B épület</option><option value="G">G épület</option></select></div>
+          </div>
+          <div class="property-kind field">
             <label for="property-kind">Ingatlan típusa</label>
             <div class="select-wrap"><select id="property-kind"><option value="lakás">Lakás</option><option value="iroda/üzlet">Iroda/Üzlet</option></select></div>
           </div>
@@ -459,6 +463,7 @@
       const primaryFields = document.getElementById('primary-fields');
       const extraList = document.getElementById('extra-list');
       const propertyKind = document.getElementById('property-kind');
+      const buildingSelect = document.getElementById('building-select');
       const hasElevator = document.getElementById('has-elevator');
       const hasTerrace = document.getElementById('has-terrace');
       const terraceArea = document.getElementById('terrace-area');
@@ -491,7 +496,7 @@
       const save = (announce = true) => {
         try {
           const meters = Object.fromEntries(meterKeys.map((key) => [key, meterInputs[key].value]));
-          const data = { kind: propertyKind.value, hasElevator: hasElevator.checked, hasTerrace: hasTerrace.checked, terraceArea: terraceArea.value, heatingAnnual: heatingAnnual.value, heatingMonthly: heatingMonthlyInput.value, meters, units };
+          const data = { building: buildingSelect.value, kind: propertyKind.value, hasElevator: hasElevator.checked, hasTerrace: hasTerrace.checked, terraceArea: terraceArea.value, heatingAnnual: heatingAnnual.value, heatingMonthly: heatingMonthlyInput.value, meters, units };
           localStorage.setItem(storageKey, JSON.stringify(data));
           if (announce) status.textContent = 'Az adatok elmentve ezen a böngészőn.';
         } catch (_) {
@@ -662,6 +667,7 @@
         units.push(makeUnit({ type: extras[0] })); renderExtras(); save(); updateFees();
       });
       propertyKind.addEventListener('change', () => { units[0].type = propertyKind.value; save(); updateFees(); });
+      buildingSelect.addEventListener('change', () => save());
       hasElevator.addEventListener('change', () => { save(); updateFees(); });
       hasTerrace.addEventListener('change', () => {
         terraceAreaField.hidden = !hasTerrace.checked;
@@ -692,6 +698,7 @@
         const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
         if (saved && Array.isArray(saved.units) && saved.units.length) {
           units = saved.units.map(makeUnit);
+          buildingSelect.value = saved.building === 'G' ? 'G' : 'B';
           hasElevator.checked = Boolean(saved.hasElevator);
           hasTerrace.checked = Boolean(saved.hasTerrace);
           terraceArea.value = saved.terraceArea || '';
