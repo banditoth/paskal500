@@ -160,6 +160,22 @@
     .about-copy strong { color: var(--ink); }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0 30px; border-top: 1px solid var(--line); color: #818982; font-size: 11px; }
     .footer-brand { color: var(--green); font-weight: 750; }
+    body.locked { overflow: hidden; }
+    body.locked .shell { visibility: hidden; }
+    .lock-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; overflow-y: auto; padding: 24px; background: radial-gradient(circle at top right, #e5ead7 0, transparent 36%), var(--paper); }
+    .lock-screen[hidden] { display: none; }
+    .lock-card { width: min(100%, 360px); padding: 30px; border: 1px solid var(--line); border-radius: 24px; background: var(--white); box-shadow: var(--shadow); text-align: center; }
+    .lock-mark { display: grid; width: 48px; height: 48px; place-items: center; margin: 0 auto 18px; border-radius: 15px; background: var(--green); color: white; font-size: 13px; font-weight: 800; }
+    .lock-card h1 { max-width: none; font-size: 28px; letter-spacing: -.045em; }
+    .lock-card > p { margin: 10px 0 20px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .pin-input { width: 100%; height: 52px; border: 1px solid #dcded5; border-radius: 12px; background: #fff; color: var(--ink); font: inherit; font-size: 21px; font-weight: 750; letter-spacing: .32em; text-align: center; }
+    .pin-error { min-height: 20px; margin: 8px 0 13px; color: #a43e32; font-size: 12px; font-weight: 650; }
+    .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .pin-key { min-height: 52px; border: 1px solid var(--line); border-radius: 12px; background: #f8f8f3; color: var(--ink); font: inherit; font-size: 18px; font-weight: 750; cursor: pointer; transition: background .15s, transform .15s; }
+    .pin-key:hover { background: #edf1e5; }
+    .pin-key:active { transform: scale(.97); }
+    .pin-key-clear { color: #8b4f41; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
     :focus-visible { outline: 3px solid #d88551; outline-offset: 3px; }
     .topbar { gap: 20px; }
     .ownership { align-items: start; }
@@ -225,7 +241,23 @@
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
 </head>
-<body>
+<body class="locked">
+  <div class="lock-screen" id="lock-screen" role="dialog" aria-modal="true" aria-labelledby="lock-title">
+    <div class="lock-card">
+      <span class="lock-mark" aria-hidden="true">P500</span>
+      <h1 id="lock-title">Belépés</h1>
+      <p>Add meg az öt karakterből álló jelszót az oldal megnyitásához.</p>
+      <label class="visually-hidden" for="pin-input">Jelszó</label>
+      <input class="pin-input" id="pin-input" type="password" maxlength="5" inputmode="text" autocomplete="off" aria-describedby="pin-error">
+      <p class="pin-error" id="pin-error" aria-live="assertive"></p>
+      <div class="pin-pad" aria-label="Jelszó billentyűzet">
+        <button class="pin-key" type="button" data-pin-key="1">1</button><button class="pin-key" type="button" data-pin-key="2">2</button><button class="pin-key" type="button" data-pin-key="3">3</button>
+        <button class="pin-key" type="button" data-pin-key="4">4</button><button class="pin-key" type="button" data-pin-key="5">5</button><button class="pin-key" type="button" data-pin-key="6">6</button>
+        <button class="pin-key" type="button" data-pin-key="7">7</button><button class="pin-key" type="button" data-pin-key="8">8</button><button class="pin-key" type="button" data-pin-key="9">9</button>
+        <button class="pin-key" type="button" data-pin-key="K">K</button><button class="pin-key" type="button" data-pin-key="0">0</button><button class="pin-key pin-key-clear" type="button" data-pin-key="C" aria-label="Jelszó törlése">C</button>
+      </div>
+    </div>
+  </div>
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Paskál 500 főoldal">
@@ -446,6 +478,7 @@
       <section id="rolam" class="about" aria-label="Fontos tudnivaló">
         <div class="about-copy">
           <p>Az oldal <strong>nem a közös képviselet és nem a lakóközösség hivatalos oldala</strong>. Az itt található eszközök és információk tájékoztató jellegűek; használatukért és az esetleges pontatlanságokért az oldal készítője felelősséget nem vállal.</p>
+          <p>Az oldal a megadott ingatlanadatokat, mérőállásokat és beállításokat a böngésződ helyi tárhelyén (localStorage) menti, hogy később is megmaradjanak. A számítások a böngésződben futnak; ezeket az adatokat az oldal nem továbbítja, és az oldal készítője nem kapja meg őket. A mentett adatokat a böngésződ webhelyadatainak törlésével távolíthatod el.</p>
         </div>
       </section>
     </main>
@@ -456,6 +489,49 @@
       <span>© <span id="year">2026</span></span>
     </footer>
   </div>
+  <script>
+    (() => {
+      const expectedPassword = 'K1590';
+      const lockScreen = document.getElementById('lock-screen');
+      const pinInput = document.getElementById('pin-input');
+      const pinError = document.getElementById('pin-error');
+      const clearPin = () => { pinInput.value = ''; pinError.textContent = ''; };
+      const checkPin = () => {
+        if (pinInput.value.length !== 5) return;
+        if (pinInput.value === expectedPassword) {
+          document.body.classList.remove('locked');
+          lockScreen.hidden = true;
+          return;
+        }
+        pinError.textContent = 'Hibás jelszó. A C gombbal törölheted, majd próbáld újra.';
+      };
+      const addPinCharacter = (character) => {
+        if (character === 'C') { clearPin(); return; }
+        if (pinInput.value.length >= 5) return;
+        pinInput.value += character;
+        pinError.textContent = '';
+        checkPin();
+      };
+      document.querySelectorAll('[data-pin-key]').forEach((button) => {
+        button.addEventListener('click', () => addPinCharacter(button.dataset.pinKey));
+      });
+      pinInput.addEventListener('input', () => {
+        pinInput.value = pinInput.value.toUpperCase().replace(/[^K0-9]/g, '').slice(0, 5);
+        pinError.textContent = '';
+        checkPin();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (lockScreen.hidden) return;
+        if (event.key.toLowerCase() === 'c') { event.preventDefault(); clearPin(); return; }
+        if (event.key === 'Backspace' && document.activeElement !== pinInput) {
+          event.preventDefault();
+          pinInput.value = pinInput.value.slice(0, -1);
+          pinError.textContent = '';
+        }
+      });
+      pinInput.focus();
+    })();
+  </script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
     (() => {
