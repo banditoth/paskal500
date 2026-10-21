@@ -29,7 +29,8 @@
     .topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; }
     .brand { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; text-decoration: none; font-weight: 750; letter-spacing: -.04em; }
     .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; background: var(--green); color: white; font-size: 14px; letter-spacing: -.07em; }
-    .brand span:last-child { font-size: 17px; }
+    .brand .brand-name { font-size: 17px; }
+    .phase-badge { display: inline-flex; align-items: center; padding: 6px 9px; border: 1px solid #efd5b3; border-radius: 999px; background: #fff3e3; color: #80532d; font-size: 9px; font-weight: 800; letter-spacing: .08em; line-height: 1; text-transform: uppercase; white-space: nowrap; }
     nav { display: flex; align-items: center; gap: 17px; max-width: calc(100% - 170px); overflow-x: auto; color: var(--muted); font-size: 11px; font-weight: 650; scrollbar-width: none; }
     nav::-webkit-scrollbar { display: none; }
     nav a { flex: 0 0 auto; text-decoration: none; white-space: nowrap; }
@@ -137,6 +138,9 @@
     .period-controls input { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #dcded5; border-radius: 10px; background: white; color: var(--ink); font: inherit; }
     .period-hint { flex: 1 1 100%; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
     .period-error { color: #9b4d31; }
+    .field-hint { margin: -10px 0 16px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .period-test-note { margin-top: 18px; padding: 12px 14px; border: 1px solid #efd5b3; border-radius: 11px; background: #fff7ed; color: #73553b; font-size: 12px; }
+    .period-test-note strong { margin-right: 5px; color: #80532d; text-transform: uppercase; letter-spacing: .05em; font-size: 10px; }
     .monthly-heading { margin: 30px 0 0; font-size: 18px; letter-spacing: -.03em; }
     .monthly-table-wrap { overflow-x: auto; margin-top: 13px; border: 1px solid var(--line); border-radius: 13px; }
     .monthly-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
@@ -203,7 +207,7 @@
       .topbar { height: 70px; }
       nav { flex: 1 1 auto; gap: 13px; max-width: calc(100% - 145px); font-size: 10px; }
       .nav-pill { padding: 9px 12px; font-size: 11px; }
-      .brand span:last-child { font-size: 15px; }
+      .brand .brand-name { font-size: 15px; }
       .hero { display: block; min-height: auto; padding: 42px 28px 25px; border-radius: 22px; }
       h1 { font-size: 47px; }
       .hero-copy > p:not(.eyebrow) { font-size: 14px; }
@@ -261,7 +265,7 @@
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Paskál 500 főoldal">
-        <span class="brand-mark">P500</span><span>Paskál 500</span>
+        <span class="brand-mark">P500</span><span class="brand-name">Paskál 500</span><span class="phase-badge">Teszt fázis</span>
       </a>
       <nav aria-label="Fő navigáció">
         <a href="#alapadatok">Alapadatok megadása</a>
@@ -313,6 +317,7 @@
             <label for="building-select">Épület</label>
             <div class="select-wrap"><select id="building-select"><option value="B">B épület</option><option value="G">G épület</option></select></div>
           </div>
+          <p class="field-hint">További épületek hamarosan elérhetőek lesznek.</p>
           <div class="property-kind field">
             <label for="property-kind">Ingatlan típusa</label>
             <div class="select-wrap"><select id="property-kind"><option value="lakás">Lakás</option><option value="iroda/üzlet">Iroda/Üzlet</option></select></div>
@@ -454,6 +459,7 @@
           <div class="field"><label for="period-end">Záró hónap</label><input id="period-end" type="month" min="2025-01"></div>
           <p class="period-hint" id="period-hint" aria-live="polite">Válassz időszakot 2025. január és a mai hónap között. Legfeljebb 12 hónap jelölhető ki.</p>
         </div>
+        <p class="period-hint period-test-note"><strong>Teszt fázis</strong> Az időszakos számítás jelenleg nem követi az év közben emelkedő vagy csökkenő díjakat; minden hónapra a most megadott díjakkal számol.</p>
         <div class="calc-guide">
           <strong>Hogyan készül a havi bontás?</strong>
           <p>A kezdő és záró hónap is beleszámít az időszakba, így például januártól márciusig 3 hónap jelenik meg. Legfeljebb 12 egymást követő hónap választható. Minden sor a most megadott ingatlanadatokkal és aktuális díjakkal számolt havi összeget ismétli; nem korábbi hónapok tényleges számláit vagy régi díjtételeit rekonstruálja. Az időszaki sor az egyes oszlopok havi összegét megszorozza a hónapok számával.</p>
